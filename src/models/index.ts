@@ -14,3 +14,4 @@ export * from './solicitud-jurado-evaluar.model';
 export * from './jurado-linea-investigacion.model';
 export * from './solicitud-comite.model';
 export * from './proponente-solicitud.model';
+export * from './arreglo-lineas-investigacion.model';

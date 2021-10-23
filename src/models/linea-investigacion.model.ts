@@ -15,10 +15,10 @@ export class LineaInvestigacion extends Entity {
   })
   nombre: string;
 
-  @property({
-    type: 'string',
-  })
-  idLineaInvestigacion?: string;
+  // @property({
+  //   type: 'string',
+  // })
+  // idLineaInvestigacion?: string;
 
   constructor(data?: Partial<LineaInvestigacion>) {
     super(data);

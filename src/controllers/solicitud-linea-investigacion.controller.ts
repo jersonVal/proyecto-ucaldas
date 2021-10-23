@@ -3,7 +3,7 @@ import {
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,11 +13,10 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
-  Solicitud,
-  LineaInvestigacion,
+  LineaInvestigacion, Solicitud
 } from '../models';
 import {SolicitudRepository} from '../repositories';
 
@@ -60,8 +59,8 @@ export class SolicitudLineaInvestigacionController {
         'application/json': {
           schema: getModelSchemaRef(LineaInvestigacion, {
             title: 'NewLineaInvestigacionInSolicitud',
-            exclude: ['_id'],
-            optional: ['idLineaInvestigacion']
+            // exclude: ['_id'],
+            // optional: ['idLineaInvestigacion']
           }),
         },
       },

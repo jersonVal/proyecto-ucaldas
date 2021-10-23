@@ -3,9 +3,9 @@ import {
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
-  import {
+import {
   del,
   get,
   getModelSchemaRef,
@@ -13,18 +13,20 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
-Jurado,
-JuradoLineaInvestigacion,
-LineaInvestigacion,
+  ArregloLineasInvestigacion,
+  Jurado,
+  JuradoLineaInvestigacion,
+  LineaInvestigacion
 } from '../models';
-import {JuradoRepository} from '../repositories';
+import {JuradoLineaInvestigacionRepository, JuradoRepository} from '../repositories';
 
 export class JuradoLineaInvestigacionController {
   constructor(
-    @repository(JuradoRepository) protected juradoRepository: JuradoRepository,
+    @repository(JuradoRepository) public juradoRepository: JuradoRepository,
+    @repository(JuradoLineaInvestigacionRepository) public juradoLineaInvestigacionRepository: JuradoLineaInvestigacionRepository,
   ) { }
 
   @get('/jurados/{id}/linea-investigacions', {
@@ -40,34 +42,67 @@ export class JuradoLineaInvestigacionController {
     },
   })
   async find(
-    @param.path.string('id') id: string,
+    @param.path.string('id') _id: string,
     @param.query.object('filter') filter?: Filter<LineaInvestigacion>,
   ): Promise<LineaInvestigacion[]> {
-    return this.juradoRepository.lineaInvestigacions(id).find(filter);
+    const busqueda = await this.juradoRepository.lineaInvestigacions(_id).find(filter);
+
+    return busqueda
   }
 
-  @post('/jurados/{id}/linea-investigacions', {
+  @post('/jurados-linea-investigacion', {
     responses: {
       '200': {
         description: 'create a LineaInvestigacion model instance',
-        content: {'application/json': {schema: getModelSchemaRef(LineaInvestigacion)}},
+        content: {'application/json': {schema: getModelSchemaRef(JuradoLineaInvestigacion)}},
       },
     },
   })
   async create(
-    @param.path.string('id') id: typeof Jurado.prototype._id,
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(LineaInvestigacion, {
+          schema: getModelSchemaRef(JuradoLineaInvestigacion, {
             title: 'NewLineaInvestigacionInJurado',
             exclude: ['_id'],
           }),
         },
       },
-    }) lineaInvestigacion: Omit<LineaInvestigacion, '_id'>,
-  ): Promise<LineaInvestigacion> {
-    return this.juradoRepository.lineaInvestigacions(id).create(lineaInvestigacion);
+    }) datos: Omit<JuradoLineaInvestigacion, '_id'>,
+  ): Promise<JuradoLineaInvestigacion | null> {
+    let registro = await this.juradoLineaInvestigacionRepository.create(datos);
+    return registro;
+
+  }
+
+  @post('/asociar-jurado-lineas-investigacion/{id}', {
+    responses: {
+      '200': {
+        description: 'create a LineaInvestigacion model instance',
+        content: {'application/json': {schema: getModelSchemaRef(ArregloLineasInvestigacion)}},
+      },
+    },
+  })
+  async createRelations(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(ArregloLineasInvestigacion, {}),
+        },
+      },
+    }) datos: ArregloLineasInvestigacion,
+    @param.path.string('id') id_jurado: typeof Jurado.prototype._id,
+  ): Promise<Boolean> {
+    if (datos.lineas_investigacion.length > 0) {
+      datos.lineas_investigacion.forEach(idLinea => {
+        this.juradoLineaInvestigacionRepository.create({
+          idJurado: id_jurado,
+          idLineaInvestigacion: idLinea
+        })
+      })
+      return true
+    }
+    return false
   }
 
   @patch('/jurados/{id}/linea-investigacions', {
